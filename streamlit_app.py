@@ -2,7 +2,7 @@ import streamlit as st
 from rembg import remove
 from PIL import Image
 import io
-
+import onnxruntime as ort
 
 def save_as_pdf(image):
     buf = io.BytesIO()
