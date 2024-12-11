@@ -22,12 +22,12 @@ def main():
     if uploaded_file:
         input_image = Image.open(uploaded_file)
         input_image = input_image.convert("RGBA")
-        st.image(input_image, caption="Original Image", use_column_width=True)
+        st.image(input_image, caption="Original Image", use_counter_width=True)
 
         with st.spinner("Removing background..."):
             output_image = remove(input_image)
 
-        st.image(output_image, caption="Background Removed", use_column_width=True)
+        st.image(output_image, caption="Background Removed", use_counter_width=True)
 
         buf = io.BytesIO()
         if format_option == "PNG":
