@@ -1,6 +1,2 @@
 streamlit
-rembg
 pillow
-pathlib
-uuid
-zipfile
