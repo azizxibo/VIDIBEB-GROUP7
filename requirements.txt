@@ -1,4 +1,6 @@
 streamlit 
 rembg 
 pillow 
-reportlab
+reportlab.pdfgen
+io
+
