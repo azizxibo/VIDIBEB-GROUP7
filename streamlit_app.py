@@ -1,56 +1,66 @@
 import streamlit as st
 from rembg import remove
 from PIL import Image
-import io
-from reportlab.pdfgen import canvas
+from io import BytesIO
 
-def save_as_pdf(image):
-    buf = io.BytesIO()
-    c = canvas.Canvas(buf)
-    c.drawImage(image, 0, 0, image.width, image.height)
-    c.save()
-    buf.seek(0)
-    return buf
+def convert_image(image, format):
+    """Convert image to the specified format."""
+    img_buffer = BytesIO()
+    image.save(img_buffer, format=format)
+    img_buffer.seek(0)
+    return img_buffer
 
 def main():
-    st.title("Background Remover App")
-    st.write("Upload an image, remove its background, and download it in your preferred format!")
+    st.title("Background Removal Tool")
 
-    uploaded_file = st.file_uploader("Upload an Image", type=["png", "jpg", "jpeg"])
-    format_option = st.selectbox("Select the output format", ["PNG", "JPG", "PDF"])
+    st.write("Upload an image to remove its background and download the result.")
+
+    # File upload
+    uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
     if uploaded_file:
-        input_image = Image.open(uploaded_file)
-        input_image = input_image.convert("RGBA")
-        st.image(input_image, caption="Original Image", use_column_width=True)
+        # Display original image
+        original_image = Image.open(uploaded_file)
+        st.image(original_image, caption="Original Image", use_column_width=True)
 
-        with st.spinner("Removing background..."):
-            output_image = remove(input_image)
+        # Process image to remove background
+        with st.spinner("Processing image..."):
+            image_bytes = uploaded_file.read()
+            output_bytes = remove(image_bytes)
+            result_image = Image.open(BytesIO(output_bytes)).convert("RGBA")
 
-        st.image(output_image, caption="Background Removed", use_column_width=True)
+        st.image(result_image, caption="Image without Background", use_column_width=True)
 
-        buf = io.BytesIO()
-        if format_option == "PNG":
-            output_image.save(buf, format="PNG")
-            file_extension = "png"
-            mime_type = "image/png"
-        elif format_option == "JPG":
-            output_image = output_image.convert("RGB")
-            output_image.save(buf, format="JPEG")
-            file_extension = "jpg"
-            mime_type = "image/jpeg"
-        elif format_option == "PDF":
-            buf = save_as_pdf(output_image)
-            file_extension = "pdf"
-            mime_type = "application/pdf"
+        # Download options
+        st.write("### Download the result:")
+        col1, col2, col3 = st.columns(3)
 
-        buf.seek(0)
-        st.download_button(
-            label="Download Image",
-            data=buf,
-            file_name=f"output.{file_extension}",
-            mime=mime_type,
-        )
+        with col1:
+            jpg_buffer = convert_image(result_image.convert("RGB"), "JPEG")
+            st.download_button(
+                label="Download JPG",
+                data=jpg_buffer,
+                file_name="no_bg.jpg",
+                mime="image/jpeg",
+            )
+
+        with col2:
+            png_buffer = convert_image(result_image, "PNG")
+            st.download_button(
+                label="Download PNG",
+                data=png_buffer,
+                file_name="no_bg.png",
+                mime="image/png",
+            )
+
+        with col3:
+            pdf_buffer = convert_image(result_image.convert("RGB"), "PDF")
+            st.download_button(
+                label="Download PDF",
+                data=pdf_buffer,
+                file_name="no_bg.pdf",
+                mime="application/pdf",
+            )
 
 if __name__ == "__main__":
     main()
