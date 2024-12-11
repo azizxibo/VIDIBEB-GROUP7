@@ -1,4 +1,6 @@
 streamlit
 rembg
 pillow
-onnxruntime
+pathlib
+uuid
+zipfile
